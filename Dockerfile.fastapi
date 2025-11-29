@@ -1,0 +1,24 @@
+# Start with a small, official Python image optimized for speed
+FROM python:3.11-slim
+
+# Set environment variables to prevent Python from writing .pyc files
+ENV PYTHONUNBUFFERED 1
+ENV PYTHONDONTWRITEBYTECODE 1
+
+# Set the working directory
+WORKDIR /usr/src/app
+
+# Copy the requirements file first to leverage Docker layer caching
+COPY requirements.txt /usr/src/app/
+
+# Install Python dependencies (FastAPI, uvicorn, pydantic)
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy the rest of the application code (including main.py)
+COPY . /usr/src/app/
+
+# Expose the port that the service will run on (8001, matching docker-compose.yml)
+EXPOSE 8001
+
+# Command to run the FastAPI application using Uvicorn
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8001"]
