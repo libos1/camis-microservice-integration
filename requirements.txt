@@ -1,0 +1,10 @@
+# Python packages required for the overall microservice system
+
+# FastAPI Dependencies (Alert Gateway)
+fastapi
+uvicorn  # ASGI server to run FastAPI
+pydantic # Data validation for API requests
+
+# Django Dependencies (Web Platform & Database)
+Django
+psycopg2-binary # For PostgreSQL database connection (common in production)
