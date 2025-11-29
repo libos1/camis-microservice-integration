@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  # 1. The Database Service (PostgreSQL)
+  db:
+    image: postgres:14-alpine
+    container_name: camis_postgres_db
+    environment:
+      POSTGRES_DB: camis_db
+      POSTGRES_USER: camis_user
+      POSTGRES_PASSWORD: camis_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+
+  # 2. The Alert Gateway Service (FastAPI)
+  fastapi_service:
+    build:
+      context: .
+      # We assume the FastAPI Dockerfile is named Dockerfile.fastapi
+      dockerfile: Dockerfile.fastapi 
+    container_name: fastapi_alert_gateway
+    command: uvicorn main:app --host 0.0.0.0 --port 8001
+    ports:
+      - "8001:8001"
+    depends_on:
+      - db
+
+  # 3. The Reporting/Portal Service (Django)
+  django_service:
+    build:
+      context: .
+      # We assume the Django Dockerfile is named Dockerfile.django
+      dockerfile: Dockerfile.django
+    container_name: django_parent_portal
+    command: python manage.py runserver 0.0.0.0:8000
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - fastapi_service # Django might need to call FastAPI
+
+volumes:
+  postgres_data:
